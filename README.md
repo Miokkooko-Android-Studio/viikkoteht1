@@ -1,8 +1,8 @@
-Datamalli koostuu task-data classista. Data classin mukana tulee automaattinen toString, equals, hashCode ja copy. Luokan muuttujia ovat id: Int, title: String, description: String, priority: Int, dueDate: String, done: Boolean.
-Funktioita on neljä, ja ne löytyvät Functions.kt tiedostosta. 
-On addTask, joka lisää task listaan uuden taskin. 
-On toggleDone, jonka avulla voi merkitä taskin tehdyksi. 
-On filterByDone, jonka avulla voi filteröidä task listan sen perusteella onko se tehty tai ei. 
-Sitten on vielä sortByDueDate, jonka avulla taskit voi lajitella päivämäärän mukaan. 
+MVVM on suunnittelumalli, joka erottaa sovelluksen eri vastuualueet: Model, View, sekä Viewmodel. MVVM on hyödyllinen, sillä se kannustaa puhdasta koodia, sekä mahdollistaa helpomman testauksen ja ylläpidon.
 
-Voit testata tätä avaamalla sen android studiossa. 
+Stateflow on tapa säilyttää ja jakaa UI:n tai logiikan tämänhetkinen tila muille komponenteille. StateFlow sopii jatkuviin tiloihin, jossa arvot voivat muuttua, esimerkiksi kun dataa latautuu tai käyttäjä on kirjautumassa sisään. 
+private val _uiState = MutableStateFlow(UiState())
+val uiState: StateFlow<UiState> = _uiState
+Tämän näköisellä koodilla yleisesti käytetään stateflowta. Ylempi muuttuja on sisäisesti muokattava ja alempi on vain luettava versio joka jaetaan ulospäin. Näin seuraajat eivät pääse vahingossa muokkaamaan tilaa. 
+val state by viewModel.uiState.collectAsState()
+UI kuuntelee tämän näköisellä koodilla tilaa. Aina kun state muuttuu compose tekee uudelleenpiirron automaattisesti. 
