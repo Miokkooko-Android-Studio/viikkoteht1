@@ -11,8 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.viikkoteht1.ui.theme.Viikkoteht1Theme
-import com.example.viikkoteht1.domain.HomeScreen
-import com.example.viikkoteht1.domain.TaskViewModel
+import com.example.viikkoteht1.view.HomeScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
