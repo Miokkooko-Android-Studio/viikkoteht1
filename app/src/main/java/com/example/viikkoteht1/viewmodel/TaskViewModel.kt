@@ -68,10 +68,9 @@ class TaskViewModel : ViewModel(){
 
     fun filterByDone(done: Boolean)
     {
-        var filteredValues = _uiState.value.copy(
+        _uiState.value = _uiState.value.copy(
             todos = _uiState.value.todos.filter{it.done == done}
         )
-
     }
 
     fun sortByDueDate(){
