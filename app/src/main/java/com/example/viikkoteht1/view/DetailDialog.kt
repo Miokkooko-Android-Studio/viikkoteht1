@@ -39,7 +39,7 @@ fun DetailDialog(
                 TextField(
                     value = duedate,
                     onValueChange = { duedate = it },
-                    label = { Text("Due date") }
+                    label = { Text("Due date (YY-MM-DD)") }
                 )
             }
         },

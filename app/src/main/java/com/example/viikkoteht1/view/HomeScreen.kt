@@ -33,7 +33,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.viikkoteht1.model.Task
 import com.example.viikkoteht1.viewmodel.TaskViewModel
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,9 +46,14 @@ import androidx.compose.runtime.setValue
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    taskViewModel: TaskViewModel = viewModel()
+    viewModel: TaskViewModel,
+    onTaskClick: (Int) -> Unit = {},
+    onAddClick: (Int) -> Unit = {},
+    onDelete: (Int) -> Unit = {},
+    onNavigateCalendar: () -> Unit = {},
+    onNavigateSettings: () -> Unit = {}
 ) {
-    val uiState by taskViewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     val taskList = uiState.todos
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
@@ -56,7 +63,21 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Todo list") }
+                title = { Text("Todo list") },
+                actions = {
+                    IconButton(onClick = onNavigateCalendar) {
+                        Icon(
+                            imageVector = Icons.Default.CalendarMonth,
+                            contentDescription = "Go to Calendar"
+                        )
+                    }
+                    IconButton(onClick = onNavigateSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Go to Settings"
+                        )
+                    }
+                }
             )
         }, floatingActionButton = {
             FloatingActionButton(onClick = { showDialog = true },
@@ -84,15 +105,13 @@ fun HomeScreen(
 
                         taskItem(
                             todo = task,
-                            onToggle = {taskViewModel.toggleDone(task.id)},
-                            onDelete = {taskViewModel.removeTask(task.id)},
+                            onToggle = {onTaskClick(task.id)},
+                            onDelete = {onDelete(task.id)},
                             onEdit = {
                                 showEditDialog = true
                                 editingTask = task
                             }
-
                         )
-
                 }
             }
 
@@ -105,7 +124,7 @@ fun HomeScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
-                    onClick = { taskViewModel.sortByDueDate() },
+                    onClick = { viewModel.sortByDueDate() },
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp)
                 ) {
@@ -113,7 +132,7 @@ fun HomeScreen(
                 }
 
                 Button(
-                    onClick = { taskViewModel.filterByDone(true) },
+                    onClick = { viewModel.filterByDone(true) },
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp)
                 ) {
@@ -121,25 +140,19 @@ fun HomeScreen(
                 }
 
                 Button(
-                    onClick = { taskViewModel.filterByDone(false) },
+                    onClick = { viewModel.filterByDone(false) },
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp)
                 ) {
                     Text("Not done")
                 }
-                Button(
-                    onClick = { taskViewModel.showAll() },
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp)
-                ) {
-                    Text("Show all")
-                }
+
             }
         }
         if (showDialog) {
             DetailDialog(
                 onUpdate = { newTask ->
-                    taskViewModel.addTask(newTask)
+                    viewModel.addTask(newTask)
                     showDialog = false
                 },
                 onClose = { showDialog = false }
@@ -149,7 +162,7 @@ fun HomeScreen(
             DetailDialogEdit(
                 task = editingTask,
                 onUpdate = { newTask ->
-                    taskViewModel.updateTask(newTask)
+                    viewModel.updateTask(newTask)
                     showEditDialog = false
                 },
                 onClose = { showEditDialog = false }
@@ -165,7 +178,8 @@ fun taskItem(
     onDelete: () -> Unit,
     onEdit: () -> Unit)
 {
-    Card(modifier = Modifier
+    Card(onClick = onEdit,
+        modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 16.dp, vertical = 8.dp))
     {
@@ -200,14 +214,7 @@ fun taskItem(
                     )
 
                 }
-                if (todo.dueDate.isNotEmpty()) {
-                    Text(
-                        text = todo.dueDate,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
 
-                }
 
             }
             Column() {
@@ -218,9 +225,7 @@ fun taskItem(
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
-                Button(onClick = onEdit) {
-                    Text("Edit")
-                }
+
             }
         }
 

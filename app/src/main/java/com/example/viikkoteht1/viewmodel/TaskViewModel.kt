@@ -19,8 +19,9 @@ class TaskViewModel : ViewModel(){
 
     init{
         val todos= listOf(
-            Task(1, "Buy milk", "Description 1", 1, "2023-10-31", false),
-            Task(2, "Drink milk", "Description 2", 2, "2021-11-10", true),
+            Task(1, "Buy milk", "Buy milk from store", 1, "2023-10-31", true),
+            Task(2, "Drink milk", "Drink the milk", 2, "2023-10-31", false),
+            Task(3, "Workout", "go to the gym", 2, "2023-11-12", false)
 
 
         )
