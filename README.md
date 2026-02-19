@@ -29,3 +29,13 @@ CalendarScreenissä näytetään taskit lähimmästä päivästä kaukaisimpaan.
 Miten AlertDialog hoitaa addTask ja editTask: 
 Kun HomeScreenissä painetaan joko nappia josta lisätään, tai editoidaan taskia, showEditDialog muuttuu trueksi, jolloin avautuu alertDialog DetailDialog tiedostosta. Siellä voi pistää Inputteihin halutut asiat ja painaa savea, jolloin showEditDialog = false, ja ruutu sulkeutuu ja detailDialogin inputFieldien tieto lähetetään viewModeliin. 
 
+Viikkotehtävä 6:
+
+Mitä room tekee: 
+Rom on abstraktiokerros SQLiten päälle, joka tekee tietokannan käytöstä helppoa ja tyyppiturvallista. Roomin arkkitehtuuri koostuu kompnenteista entity, DAO ja database. Entity on kotlin luokka, joka edustaa tietokannan taulua. DAO sisältää metodit tietokannan käsittelyyn. Database on tietokantayhteys (singleton), joka tarjoaa pääsyn DAO:ihin. 
+
+Projektin rakenne: 
+Projektin rakenne koostuu viewistä, viewmodelista, repositorystä ja datasta. Data paketti sisältää Room komponentit. Repository paketti sisältää repository tiedoston, joka toimii välikätenä viewmodelin ja tietokannan kommunikoinnissa. Viewistä löytyy Ui tiedostot. 
+
+Miten datavirta kulkee: 
+esimerkkiksi: UI:ssa käyttäjä lisää taskin -> viewModel kutsuu repositorya -> Repository kutsuu DAO:ta -> database tallentaa SQLiteen 
