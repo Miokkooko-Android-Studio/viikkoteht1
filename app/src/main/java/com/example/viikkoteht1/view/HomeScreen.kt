@@ -1,6 +1,7 @@
 package com.example.viikkoteht1.view
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,16 +32,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.viikkoteht1.model.Task
+import com.example.viikkoteht1.data.Task
 import com.example.viikkoteht1.viewmodel.TaskViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,14 +51,14 @@ import androidx.compose.runtime.setValue
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: TaskViewModel,
-    onTaskClick: (Int) -> Unit = {},
-    onAddClick: (Int) -> Unit = {},
-    onDelete: (Int) -> Unit = {},
+
     onNavigateCalendar: () -> Unit = {},
     onNavigateSettings: () -> Unit = {}
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val taskList = uiState.todos
+    val tasks by viewModel.allTasks.collectAsState()
+    val pendingCount by viewModel.pendingCount.collectAsState()
+
+
     var showDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
     var editingTask by remember { mutableStateOf<Task?>(null) }
@@ -63,7 +67,13 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Todo list") },
+                title = {
+                    Column() {
+                        Text("Todo list")
+                        Text("${pendingCount} tekemättä",
+                            style = MaterialTheme.typography.bodySmall)
+                    }
+                },
                 actions = {
                     IconButton(onClick = onNavigateCalendar) {
                         Icon(
@@ -95,85 +105,77 @@ fun HomeScreen(
         ) {
             Text("Todo-list")
             Spacer(modifier = Modifier.height(16.dp))
-
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                items(taskList) { task ->
+            if (tasks.isEmpty()) {
+                // Tyhjä tila: kiva ikoni ja teksti keskellä
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = Color.Gray
+                        )
+                        Text("Ei tehtäviä", color = Color.Gray)
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    items(tasks, key = {it.id}) { task ->
 
                         taskItem(
-                            todo = task,
-                            onToggle = {onTaskClick(task.id)},
-                            onDelete = {onDelete(task.id)},
+                            task = task,
+                            onToggle = { viewModel.toggleTask(task) },
+                            onDelete = { viewModel.deleteTask(task) },
                             onEdit = {
                                 showEditDialog = true
+
                                 editingTask = task
                             }
                         )
+                    }
                 }
             }
-
 
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = { viewModel.sortByDueDate() },
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp)
-                ) {
-                    Text("By date")
-                }
-
-                Button(
-                    onClick = { viewModel.filterByDone(true) },
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp)
-                ) {
-                    Text("Done")
-                }
-
-                Button(
-                    onClick = { viewModel.filterByDone(false) },
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(vertical = 4.dp, horizontal = 8.dp)
-                ) {
-                    Text("Not done")
-                }
-
-            }
         }
         if (showDialog) {
             DetailDialog(
                 onUpdate = { newTask ->
-                    viewModel.addTask(newTask)
+                    viewModel.addTask(newTask.title,newTask.description, newTask.dueDate)
                     showDialog = false
                 },
                 onClose = { showDialog = false }
             )
         }
+
         if (showEditDialog) {
             DetailDialogEdit(
                 task = editingTask,
                 onUpdate = { newTask ->
-                    viewModel.updateTask(newTask)
+                    viewModel.editTask(newTask)
                     showEditDialog = false
                 },
                 onClose = { showEditDialog = false }
             )
         }
+
     }
 }
 
 @Composable
 fun taskItem(
-    todo: Task,
+    task: Task,
     onToggle: () -> Unit,
     onDelete: () -> Unit,
     onEdit: () -> Unit)
@@ -189,7 +191,7 @@ fun taskItem(
             verticalAlignment = Alignment.CenterVertically
         ){
             Checkbox(
-                checked = todo.done,
+                checked = task.isCompleted,
                 onCheckedChange = { onToggle() }
             )
             Column(
@@ -198,17 +200,26 @@ fun taskItem(
                     .padding(horizontal = 16.dp)
             ) {
                 Text(
-                    text = todo.title,
+                    text = task.title,
                     style = MaterialTheme.typography.bodyLarge,
-                    textDecoration = if (todo.done)
+                    textDecoration = if (task.isCompleted)
                         TextDecoration.LineThrough
                     else
                         null
                 )
 
-                if (todo.description.isNotEmpty()) {
+                if (task.description.isNotEmpty()) {
                     Text(
-                        text = todo.description,
+                        text = task.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                }
+
+                if (task.dueDate.isNotEmpty()) {
+                    Text(
+                        text = task.dueDate,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -221,7 +232,7 @@ fun taskItem(
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete todo",
+                        contentDescription = "Delete task",
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

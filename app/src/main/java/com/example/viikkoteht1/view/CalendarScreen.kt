@@ -28,7 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.room.util.copy
-import com.example.viikkoteht1.model.Task
+import com.example.viikkoteht1.data.Task
 import com.example.viikkoteht1.viewmodel.TaskViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -39,17 +39,10 @@ fun CalendarScreen(
     viewModel: TaskViewModel,
     onNavigateBack: () -> Unit = {}
 ){
-    val uiState by viewModel.uiState.collectAsState()
-    val taskList = uiState.todos
+    val taskList by viewModel.allTasks.collectAsState()
+    val sortedTasks = taskList.sortedByDescending { it.dueDate }
+    val groupedTasks = sortedTasks.groupBy { it.dueDate }
 
-
-    val sortedTasks = taskList.sortedWith(
-        compareBy<Task> { it.dueDate == null }
-            .thenBy { it.dueDate }
-    )
-
-
-    val groupedTasks = sortedTasks.groupBy { it.dueDate ?: "No date" }
 
     Scaffold(
         topBar = {

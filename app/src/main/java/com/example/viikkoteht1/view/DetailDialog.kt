@@ -10,7 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.example.viikkoteht1.model.Task
+import com.example.viikkoteht1.data.Task
 
 @Composable
 fun DetailDialog(
@@ -51,8 +51,6 @@ fun DetailDialog(
                             id = 0,
                             title = title,
                             description = description,
-                            done = false,
-                            priority = 1,
                             dueDate = duedate
                         ))
                     }
@@ -117,3 +115,4 @@ fun DetailDialogEdit(
         }
     )
 }
+

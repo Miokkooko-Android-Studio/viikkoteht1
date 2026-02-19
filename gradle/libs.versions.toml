@@ -18,6 +18,7 @@ lifecycle = "2.8.7"
 navigation = "2.9.7"
 navigationCompose = "2.8.5"
 roomKtx = "2.8.4"
+foundationLayoutVersion = "1.10.3"
 
 [libraries]
 
@@ -51,6 +52,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3",
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 material3 = { module = "androidx.compose.material3:material3" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
+androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayoutVersion" }
 
 
 [plugins]
